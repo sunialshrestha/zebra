@@ -10,17 +10,22 @@ import {
   getOrderDetails,
   payOrder,
   deliverOrder,
+  payOrderByStripe,
 } from '../actions/orderActions'
 import {
   ORDER_PAY_RESET,
   ORDER_DELIVER_RESET,
 } from '../constants/orderConstants'
 
+import { isEmpty } from '../Helpers'
+
+import StripeCheckout from 'react-stripe-checkout'
+
+import { toast } from 'react-toastify'
+
 const OrderScreen = ({ match, history }) => {
   const orderId = match.params.id
-
   const [sdkReady, setSdkReady] = useState(false)
-
   const dispatch = useDispatch()
 
   const orderDetails = useSelector((state) => state.orderDetails)
@@ -46,41 +51,65 @@ const OrderScreen = ({ match, history }) => {
   }
 
   useEffect(() => {
-    if (!userInfo) {
+    if (isEmpty(userInfo)) {
       history.push('/login')
-    }
-    const addPayPalScript = async () => {
-      const { data: clientId } = await axios.get('/api/config/paypal')
-      const script = document.createElement('script')
-      script.type = 'text/javascript'
-      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`
-      script.async = true
-      script.onload = () => {
-        setSdkReady(true)
-      }
-      document.body.appendChild(script)
     }
 
     if (successPay || !order || order._id !== orderId || successDeliver) {
       dispatch({ type: ORDER_PAY_RESET })
       dispatch({ type: ORDER_DELIVER_RESET })
       dispatch(getOrderDetails(orderId))
-    } else if (!order.isPaid) {
-      if (!window.paypal) {
-        addPayPalScript()
-      } else {
-        setSdkReady(true)
+    } else if (!order.isPaid && order.paymentMethod === 'PayPal') {
+      const addPayPalScript = async () => {
+        const { data: clientId } = await axios.get('/api/config/paypal')
+        const script = document.createElement('script')
+        script.type = 'text/javascript'
+        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`
+        script.async = true
+        script.onload = () => {
+          setSdkReady(true)
+        }
+        document.body.appendChild(script)
       }
+      addPayPalScript()
+    } else {
+      setSdkReady(true)
     }
-  }, [order, history, userInfo, dispatch, orderId, successPay, successDeliver])
+  }, [history, userInfo, order, dispatch, orderId, successPay, successDeliver])
 
   const successPaymentHandler = (paymentResult) => {
-    console.log(paymentResult)
     dispatch(payOrder(orderId, paymentResult))
   }
 
   const deliverHandler = () => {
     dispatch(deliverOrder(order))
+  }
+
+  const onToken = async (token) => {
+    setSdkReady(true)
+    const config = {
+      headers: {
+        'content-Type': 'application/json',
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    }
+    const response = await axios.post(
+      `/api/orders/${orderId}`,
+      { token, orderId },
+      config
+    )
+    const { errorStripe, status, data: dataStripe } = response.data
+    if (status === 'success') {
+      setSdkReady(false)
+      dispatch(payOrderByStripe(orderId, dataStripe))
+      toast('Successfully paid with Stripe, please check emails for details', {
+        type: 'success',
+      })
+    } else {
+      toast(`problem with stripe payment ${errorStripe}, please try again`, {
+        type: 'error',
+      })
+    }
   }
 
   return loading ? (
@@ -116,7 +145,6 @@ const OrderScreen = ({ match, history }) => {
                 <Message variant='danger'> Not Delivered </Message>
               )}
             </ListGroup.Item>
-
             <ListGroup.Item>
               <h2> Payment Method </h2>
               <p>
@@ -129,7 +157,6 @@ const OrderScreen = ({ match, history }) => {
                 <Message variant='danger'> Not Paid </Message>
               )}
             </ListGroup.Item>
-
             <ListGroup.Item>
               <h2> Order Items</h2>
               {order.orderItems.length === 0 ? (
@@ -175,7 +202,6 @@ const OrderScreen = ({ match, history }) => {
                   <Col> ${order.itemsPrice}</Col>
                 </Row>
               </ListGroup.Item>
-
               <ListGroup.Item>
                 <Row>
                   <Col> Shipping </Col>
@@ -199,6 +225,12 @@ const OrderScreen = ({ match, history }) => {
                   {loadingPay && <Loader />}
                   {!sdkReady ? (
                     <Loader />
+                  ) : order.paymentMethod === 'Stripe' ? (
+                    <StripeCheckout
+                      token={onToken}
+                      stripeKey='pk_test_51IcitgFDr39WI5VWd1txOFMjTZJkyzBOmj7fQ5ASHrn1PWYH7njpVTiebTP2BcDK0hZEd3tvEiSvvHKdkqN6qDEG00kxXBSKiE'
+                      amount={order.totalPrice * 100}
+                    />
                   ) : (
                     <PayPalButton
                       amount={order.totalPrice}
@@ -229,5 +261,4 @@ const OrderScreen = ({ match, history }) => {
     </>
   )
 }
-
 export default OrderScreen

@@ -57,12 +57,14 @@ const productSchema = mongoose.Schema(
     price: {
       type: Number,
       required: true,
+      min: [0, 'Price should be positive number'],
       default: 0,
     },
     countInStock: {
       type: Number,
       required: true,
       default: 0,
+      min: [0, 'Stock should be positive number'],
     },
   },
   {

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import Message from '../components/Message'
 import CheckoutStep from '../components/CheckoutStep'
 import { createOrder } from '../actions/orderActions'
+import { isEmpty } from '../Helpers'
 
 const PlaceOrderScreen = ({ history }) => {
   const dispatch = useDispatch()
@@ -30,12 +31,33 @@ const PlaceOrderScreen = ({ history }) => {
   const orderCreate = useSelector((state) => state.orderCreate)
   const { order, success, error } = orderCreate
 
+  const userLogin = useSelector((state) => state.userLogin)
+  const { userInfo } = userLogin
+
+  const shippingAddressChecked =
+    !isEmpty(cart.shippingAddress.address) &&
+    !isEmpty(cart.shippingAddress.city) &&
+    !isEmpty(cart.shippingAddress.postalCode) &&
+    !isEmpty(cart.shippingAddress.country)
+
   useEffect(() => {
+    if (isEmpty(userInfo)) {
+      history.push('/login')
+    }
+
+    if (cart.cartItems.length === 0) {
+      history.push('/cart')
+    } else if (!shippingAddressChecked) {
+      history.push('/shipping')
+    } else if (isEmpty(cart.paymentMethod)) {
+      history.push('/payment')
+    }
+
     if (success) {
       history.push(`/order/${order._id}`)
     }
     // eslint-disable-next-line
-  }, [history, success])
+  }, [history, success, userInfo, shippingAddressChecked, cart])
 
   const placeOrderHandler = () => {
     dispatch(
@@ -59,12 +81,17 @@ const PlaceOrderScreen = ({ history }) => {
           <ListGroup variant='flush'>
             <ListGroup.Item>
               <h2> Shipping </h2>
-              <p>
-                <strong> Address:</strong>
-                {cart.shippingAddress.address}, {cart.shippingAddress.city}{' '}
-                {cart.shippingAddress.postalCode},{' '}
-                {cart.shippingAddress.country}
-              </p>
+
+              {!shippingAddressChecked ? (
+                <Message> Please fill up the shipping address </Message>
+              ) : (
+                <p>
+                  <strong> Address:</strong>
+                  {cart.shippingAddress.address}, {cart.shippingAddress.city}{' '}
+                  {cart.shippingAddress.postalCode},{' '}
+                  {cart.shippingAddress.country}
+                </p>
+              )}
             </ListGroup.Item>
 
             <ListGroup.Item>
@@ -145,7 +172,9 @@ const PlaceOrderScreen = ({ history }) => {
               <Button
                 type='button'
                 className='btn-block'
-                disabled={cart.cartItems === 0}
+                disabled={
+                  !shippingAddressChecked || cart.cartItems.length === 0
+                }
                 onClick={placeOrderHandler}
               >
                 Place Order
