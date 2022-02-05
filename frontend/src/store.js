@@ -1,6 +1,7 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux'
 import thunk from 'redux-thunk'
 import { composeWithDevTools } from 'redux-devtools-extension'
+import { Jwt } from 'jsonwebtoken'
 import {
   productListReducer,
   productDetailsReducer,
@@ -28,6 +29,13 @@ import {
   orderListReducer,
   orderDeliverReducer,
 } from './reducers/orderReducers'
+import {
+  postListReducer,
+  postDetailsReducer,
+  postDeleteReducer,
+  postCreateReducer,
+  postUpdateReducer,
+} from './reducers/postReducers'
 
 const reducer = combineReducers({
   productList: productListReducer,
@@ -51,15 +59,30 @@ const reducer = combineReducers({
   orderDeliver: orderDeliverReducer,
   orderListMy: orderListMyReducer,
   orderList: orderListReducer,
+  postList: postListReducer,
+  postDetails: postDetailsReducer,
+  postDelete: postDeleteReducer,
+  postCreate: postCreateReducer,
+  postUpdate: postUpdateReducer,
 })
+
+const tokenExpired = () => {
+  var isExpired = false
+  const token = localStorage.getItem('userInfo')
+  var decodedToken = Jwt.decode(token, { complete: true })
+  var dateNow = new Date()
+
+  if (decodedToken.exp < dateNow.getTime()) isExpired = true
+}
 
 const cartItemsFromStorage = localStorage.getItem('cartItems')
   ? JSON.parse(localStorage.getItem('cartItems'))
   : []
 
-const userInfoFromStorage = localStorage.getItem('userInfo')
-  ? JSON.parse(localStorage.getItem('userInfo'))
-  : []
+const userInfoFromStorage =
+  localStorage.getItem('userInfo') && !tokenExpired
+    ? JSON.parse(localStorage.getItem('userInfo'))
+    : []
 
 const shippingAdressFromStorage = localStorage.getItem('shippingAddress')
   ? JSON.parse(localStorage.getItem('shippingAddress'))
@@ -83,7 +106,7 @@ const middleware = [thunk]
 const store = createStore(
   reducer,
   initialState,
-  composeWithDevTools(applyMiddleware(...middleware))
+  composeWithDevTools(applyMiddleware(...middleware)),
 )
 
 export default store

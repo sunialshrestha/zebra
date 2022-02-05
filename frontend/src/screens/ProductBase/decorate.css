@@ -1,0 +1,17 @@
+#draggable {
+  background-color: white;
+  position: relative;
+  width: 80%;
+  height: 400px;
+  margin: 0 auto;
+  background-image: url('http://139.59.24.243/images/invitations/birthday/a.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  -webkit-mask-image: url(http://139.59.24.243/images/invitations/birthday/ice.png);
+  mask-image: url(http://tympanus.net/codrops-playground/assets/images/cssref/properties/mask-image/mask-image.png);
+  -webkit-mask-position: center center;
+  mask-position: center center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}

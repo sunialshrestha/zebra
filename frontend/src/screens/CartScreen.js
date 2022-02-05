@@ -35,7 +35,6 @@ const CartScreen = ({ match, location, history }) => {
         <h1> Shopping Cart</h1>
         {cartItems.length === 0 ? (
           <Message>
-            {' '}
             Your cart is empty <Link to='/'> Go Back </Link>
           </Message>
         ) : (
@@ -56,7 +55,7 @@ const CartScreen = ({ match, location, history }) => {
                       value={item.qty}
                       onChange={(e) =>
                         dispatch(
-                          addToCart(item.product, Number(e.target.value))
+                          addToCart(item.product, Number(e.target.value)),
                         )
                       }
                     >

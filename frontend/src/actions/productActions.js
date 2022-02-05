@@ -25,12 +25,22 @@ import {
 
 export const listProducts =
   (keyword = '', pageNumber) =>
-  async (dispatch) => {
+  async (dispatch, getState) => {
     try {
+      const {
+        userLogin: { userInfo },
+      } = getState()
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      }
+
       dispatch({ type: PRODUCT_LIST_REQUEST })
 
       const { data } = await axios.get(
-        `/api/products?keyword=${keyword}&pageNumber=${pageNumber}`
+        `/api/products?keyword=${keyword}&pageNumber=${pageNumber}`,
+        config,
       )
 
       dispatch({
@@ -48,11 +58,20 @@ export const listProducts =
     }
   }
 
-export const listProductDetails = (id) => async (dispatch) => {
+export const listProductDetails = (id) => async (dispatch, getState) => {
   try {
+    const {
+      userLogin: { userInfo },
+    } = getState()
+    const config = {
+      headers: {
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    }
+
     dispatch({ type: PRODUCT_DETAILS_REQUEST })
 
-    const { data } = await axios.get(`/api/products/${id}`)
+    const { data } = await axios.get(`/api/products/${id}`, config)
 
     dispatch({
       type: PRODUCT_DETAILS_SUCCESS,
@@ -154,7 +173,7 @@ export const updateProduct = (product) => async (dispatch, getState) => {
     const { data } = await axios.put(
       `/api/products/${product._id}`,
       product,
-      config
+      config,
     )
 
     dispatch({

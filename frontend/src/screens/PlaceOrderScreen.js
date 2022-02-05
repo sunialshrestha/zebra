@@ -17,7 +17,7 @@ const PlaceOrderScreen = ({ history }) => {
 
   // Calculate Prices
   cart.itemsPrice = addDecimals(
-    cart.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0)
+    cart.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0),
   )
 
   cart.shippingPrice = addDecimals(cart.itemsPrice > 100 ? 100 : 0)
@@ -69,7 +69,7 @@ const PlaceOrderScreen = ({ history }) => {
         ShippingPrice: cart.shippingPrice,
         taxPrice: cart.taxPrice,
         totalPrice: cart.totalPrice,
-      })
+      }),
     )
   }
 

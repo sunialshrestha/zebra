@@ -18,6 +18,17 @@ import UserEditScreen from './screens/UserEditScreen'
 import ProductListScreen from './screens/ProductListScreen'
 import ProductEditScreen from './screens/ProductEditScreen'
 import OrderListScreen from './screens/OrderListScreen'
+import PostListScreen from './screens/PostListScreen'
+import PostScreen from './screens/PostScreen'
+import PostEditScreen from './screens/PostEditScreen'
+import PostCreateScreen from './screens/PostCreateScreen'
+import Dashboard from './components/dashboard/Dashboard'
+import Dash from './components/Designer/Dash'
+import ImgEditor from './components/ImgEditor'
+import FileManagerScreen from './screens/FileManagerScreen'
+
+import DesignsScreen from './screens/ProductBase/DesignsScreen'
+import DesignCanvas from './components/FabricDesign/DesignCanvas'
 
 const App = () => {
   return (
@@ -55,6 +66,18 @@ const App = () => {
           />
 
           <Route path='/admin/orderlist' component={OrderListScreen} />
+
+          <Route path='/admin/postlist' component={PostListScreen} exact />
+          <Route
+            path='/admin/postlist/:pageNumber'
+            component={PostListScreen}
+            exact
+          />
+          <Route path='/post/:id' component={PostScreen} />
+
+          <Route path='/admin/post/:id/Edit' component={PostEditScreen} />
+          <Route path='/admin/post/Create' component={PostCreateScreen} />
+
           <Route path='/search/:keyword' component={HomeScreen} exact />
 
           <Route path='/page/:pageNumber' component={HomeScreen} exact />
@@ -63,6 +86,15 @@ const App = () => {
             component={HomeScreen}
             exact
           />
+
+          <Route path='/design' component={Dashboard} />
+          <Route path='/image-editor' component={ImgEditor} />
+          <Route path='/designer/dash' component={Dash} />
+          <Route path='/admin/filemanager' component={FileManagerScreen} />
+
+          <Route path='/designscreen' component={DesignsScreen} />
+
+          <Route path='/designfabric' component={DesignCanvas} />
 
           <Route path='/' component={HomeScreen} exact />
         </Container>
