@@ -2,17 +2,21 @@
   "name": "proshop",
   "version": "1.0.0",
   "description": "MERN Shopping Cart App",
+  "homepage": "https://sunialshrestha.github.io",
   "main": "server.js",
   "type": "module",
   "scripts": {
     "start": "node backend/server",
+    "build": "react-scripts build",
     "server": "nodemon backend/server",
     "client": "npm start --prefix frontend",
     "file-server": "set PORT=8000 && node node_modules/@syncfusion/ej2-filemanager-node-filesystem/filesystem-server.js -d uploads/ImageStock",
     "dev": "concurrently \"npm run server\" \"npm run client\" \"npm run file-server\" ",
     "data:import": "node backend/seeder",
     "data:destroy": "node backend/seeder -d",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix frontend && npm run build --prefix frontend"
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix frontend && npm run build --prefix frontend",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "author": "Sunil Shrestha",
   "license": "ISC",
@@ -24,6 +28,7 @@
     "colors": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
+    "eslint": "^8.10.0",
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
     "express-fileupload": "^1.2.1",
@@ -31,6 +36,7 @@
     "mongoose": "^5.13.3",
     "morgan": "^1.10.0",
     "multer": "^1.4.3",
+    "react-scripts": "^5.0.0",
     "stripe": "^8.169.0",
     "uuid": "^8.3.2"
   },
